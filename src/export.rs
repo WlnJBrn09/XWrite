@@ -62,8 +62,7 @@ pub fn export_document(body: &ExportBody) -> Result<ExportFile, ExportError> {
             Ok(ExportFile {
                 filename: format!("{title}.docx"),
                 content_type:
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        .into(),
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document".into(),
                 bytes,
             })
         }
@@ -100,50 +99,53 @@ fn sanitize_filename(s: &str) -> String {
 
 pub fn html_to_plain(html: &str) -> String {
     let mut out = String::new();
-    let mut in_tag = false;
-    let mut entity = String::new();
-    let mut in_entity = false;
-    for c in html.chars() {
-        if in_entity {
-            if c == ';' || entity.len() > 12 {
-                out.push_str(&decode_entity(&entity));
-                entity.clear();
-                in_entity = false;
-                if c != ';' {
-                    // fallthrough handle c
-                } else {
-                    continue;
+    let mut rest = html;
+    while !rest.is_empty() {
+        if let Some(after) = rest.strip_prefix('<') {
+            if let Some(end) = after.find('>') {
+                let tag = after[..end].trim().to_ascii_lowercase();
+                let name = tag
+                    .trim_start_matches('/')
+                    .split(|c: char| c.is_whitespace() || c == '/')
+                    .next()
+                    .unwrap_or("");
+                let closing = tag.starts_with('/');
+                if name == "br" {
+                    out.push('\n');
+                } else if matches!(name, "p" | "div" | "h1" | "h2" | "h3" | "h4" | "li" | "tr")
+                    && (closing || name == "li")
+                {
+                    if !out.ends_with('\n') {
+                        out.push('\n');
+                    }
+                    out.push('\n');
                 }
-            } else {
-                entity.push(c);
+                rest = &after[end + 1..];
                 continue;
             }
         }
-        match c {
-            '<' => in_tag = true,
-            '>' => {
-                in_tag = false;
-                // block breaks
-                out.push('\n');
+        if let Some(after) = rest.strip_prefix('&') {
+            if let Some(end) = after.find(';').filter(|n| *n <= 12) {
+                out.push_str(&decode_entity(&after[..end]));
+                rest = &after[end + 1..];
+                continue;
             }
-            '&' if !in_tag => {
-                in_entity = true;
-                entity.clear();
-            }
-            _ if !in_tag => out.push(c),
-            _ => {}
         }
+        let c = rest.chars().next().unwrap();
+        out.push(c);
+        rest = &rest[c.len_utf8()..];
     }
-    // collapse whitespace lines
-    let mut lines: Vec<String> = out
-        .lines()
-        .map(|l| l.split_whitespace().collect::<Vec<_>>().join(" "))
-        .filter(|l| !l.is_empty())
-        .collect();
-    if lines.is_empty() {
-        lines.push(String::new());
-    }
-    lines.join("\n\n")
+    out.split("\n\n")
+        .map(|p| {
+            p.lines()
+                .map(|l| l.split_whitespace().collect::<Vec<_>>().join(" "))
+                .filter(|l| !l.is_empty())
+                .collect::<Vec<_>>()
+                .join("\n")
+        })
+        .filter(|p| !p.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n\n")
 }
 
 fn decode_entity(e: &str) -> String {
@@ -153,6 +155,18 @@ fn decode_entity(e: &str) -> String {
         "gt" => ">".into(),
         "quot" => "\"".into(),
         "nbsp" => " ".into(),
+        "apos" => "'".into(),
+        e if e.starts_with("#x") || e.starts_with("#X") => u32::from_str_radix(&e[2..], 16)
+            .ok()
+            .and_then(char::from_u32)
+            .map(|c| c.to_string())
+            .unwrap_or_else(|| format!("&{e};")),
+        e if e.starts_with('#') => e[1..]
+            .parse::<u32>()
+            .ok()
+            .and_then(char::from_u32)
+            .map(|c| c.to_string())
+            .unwrap_or_else(|| format!("&{e};")),
         _ => format!("&{e};"),
     }
 }
@@ -160,7 +174,10 @@ fn decode_entity(e: &str) -> String {
 pub fn html_to_markdown(html: &str) -> String {
     // Very small HTML→MD: headings, bold, italic, lists, links, paragraphs
     let mut s = html.to_string();
-    s = s.replace("<br>", "\n").replace("<br/>", "\n").replace("<br />", "\n");
+    s = s
+        .replace("<br>", "\n")
+        .replace("<br/>", "\n")
+        .replace("<br />", "\n");
     s = replace_tag_content(&s, "h1", "# ", "\n\n");
     s = replace_tag_content(&s, "h2", "## ", "\n\n");
     s = replace_tag_content(&s, "h3", "### ", "\n\n");
@@ -170,6 +187,8 @@ pub fn html_to_markdown(html: &str) -> String {
     s = replace_tag_content(&s, "i", "*", "*");
     s = replace_tag_content(&s, "code", "`", "`");
     s = replace_tag_content(&s, "li", "- ", "\n");
+    s = replace_links(&s);
+    s = s.replace("</p>", "\n\n").replace("</div>", "\n\n");
     s = strip_tags(&s);
     html_to_plain(&s.chars().map(|c| c).collect::<String>())
         .lines()
@@ -182,7 +201,8 @@ pub fn html_to_markdown(html: &str) -> String {
 fn replace_tag_content(html: &str, tag: &str, before: &str, after: &str) -> String {
     let open = format!("<{tag}");
     let close = format!("</{tag}>");
-    let lower = html.to_lowercase();
+    // ASCII case folding keeps byte offsets aligned for Unicode document text.
+    let lower = html.to_ascii_lowercase();
     let mut out = String::new();
     let mut i = 0;
     let bytes = html.as_bytes();
@@ -219,6 +239,44 @@ fn replace_tag_content(html: &str, tag: &str, before: &str, after: &str) -> Stri
     out
 }
 
+fn replace_links(html: &str) -> String {
+    let mut result = String::new();
+    let mut rest = html;
+    while let Some(start) = rest.to_ascii_lowercase().find("<a ") {
+        result.push_str(&rest[..start]);
+        let anchor = &rest[start..];
+        let Some(open_end) = anchor.find('>') else {
+            result.push_str(anchor);
+            return result;
+        };
+        let Some(close_start) = anchor[open_end + 1..].to_ascii_lowercase().find("</a>") else {
+            result.push_str(anchor);
+            return result;
+        };
+        let label = &anchor[open_end + 1..open_end + 1 + close_start];
+        let opening = &anchor[..open_end + 1];
+        let href = opening.split_whitespace().find_map(|part| {
+            let value = part.strip_prefix("href=")?;
+            Some(value.trim_matches(['"', '\'', '>']).to_string())
+        });
+        if let Some(url) = href.filter(|url| {
+            (url.starts_with("https://")
+                || url.starts_with("http://")
+                || url.starts_with("mailto:")
+                || url.starts_with('#'))
+                && !url.contains('<')
+                && !url.contains('>')
+        }) {
+            result.push_str(&format!("[{label}]({})", url.replace(')', "\\)")));
+        } else {
+            result.push_str(label);
+        }
+        rest = &anchor[open_end + 1 + close_start + 4..];
+    }
+    result.push_str(rest);
+    result
+}
+
 fn find_subslice(hay: &[u8], needle: &[u8]) -> Option<usize> {
     hay.windows(needle.len()).position(|w| w == needle)
 }
@@ -237,7 +295,7 @@ fn strip_tags(html: &str) -> String {
     out
 }
 
-fn build_docx(title: &str, plain: &str) -> Result<Vec<u8>, String> {
+fn build_docx(_title: &str, plain: &str) -> Result<Vec<u8>, String> {
     let mut buf = Cursor::new(Vec::new());
     {
         let mut zip = ZipWriter::new(&mut buf);
@@ -272,15 +330,17 @@ fn build_docx(title: &str, plain: &str) -> Result<Vec<u8>, String> {
         body.push_str(
             r#"<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>"#,
         );
-        // title paragraph
-        body.push_str(&format!(
-            "<w:p><w:r><w:t>{}</w:t></w:r></w:p>",
-            xml_escape(title)
-        ));
         for para in plain.split("\n\n") {
-            body.push_str("<w:p><w:r><w:t xml:space=\"preserve\">");
-            body.push_str(&xml_escape(&para.replace('\n', " ")));
-            body.push_str("</w:t></w:r></w:p>");
+            body.push_str("<w:p>");
+            for (i, line) in para.split('\n').enumerate() {
+                if i > 0 {
+                    body.push_str("<w:r><w:br/></w:r>");
+                }
+                body.push_str("<w:r><w:t xml:space=\"preserve\">");
+                body.push_str(&xml_escape(line));
+                body.push_str("</w:t></w:r>");
+            }
+            body.push_str("</w:p>");
         }
         body.push_str(r#"<w:sectPr/></w:body></w:document>"#);
         zip.write_all(body.as_bytes()).map_err(|e| e.to_string())?;
@@ -321,22 +381,10 @@ fn build_simple_pdf(title: &str, plain: &str) -> Result<Vec<u8>, String> {
         }
         lines.push(String::new());
     }
-    if lines.len() > 60 {
-        lines.truncate(60);
-        lines.push("…".into());
-    }
-
-    // Build PDF content stream
-    let mut content = String::from("BT\n/F1 12 Tf\n14 TL\n50 780 Td\n");
-    for (i, line) in lines.iter().enumerate() {
-        if i > 0 {
-            content.push_str("T*\n");
-        }
-        content.push_str(&format!("({}) Tj\n", pdf_escape(line)));
-    }
-    content.push_str("ET");
-
-    let content_bytes = content.as_bytes();
+    // A letter page holds 49 lines at 14 pt leading with the chosen margins.
+    // Keep every paragraph rather than silently truncating long documents.
+    let pages: Vec<&[String]> = lines.chunks(49).collect();
+    let font_id = 3 + pages.len() * 2;
     let mut pdf = Vec::new();
     let mut offsets = Vec::new();
 
@@ -358,29 +406,41 @@ fn build_simple_pdf(title: &str, plain: &str) -> Result<Vec<u8>, String> {
         1,
         b"<< /Type /Catalog /Pages 2 0 R >>",
     );
+    let kids = (0..pages.len())
+        .map(|i| format!("{} 0 R", 3 + 2 * i))
+        .collect::<Vec<_>>()
+        .join(" ");
     write_obj(
         &mut pdf,
         &mut offsets,
         2,
-        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        format!("<< /Type /Pages /Kids [{kids}] /Count {} >>", pages.len()).as_bytes(),
     );
+    for (i, page_lines) in pages.iter().enumerate() {
+        let page_id = 3 + i * 2;
+        let content_id = page_id + 1;
+        write_obj(&mut pdf, &mut offsets, page_id,
+            format!("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents {content_id} 0 R /Resources << /Font << /F1 {font_id} 0 R >> >> >>").as_bytes());
+        let mut content = b"BT\n/F1 12 Tf\n14 TL\n50 758 Td\n".to_vec();
+        for (line_no, line) in page_lines.iter().enumerate() {
+            if line_no > 0 {
+                content.extend_from_slice(b"T*\n");
+            }
+            content.push(b'(');
+            content.extend_from_slice(&pdf_escape(line));
+            content.extend_from_slice(b") Tj\n");
+        }
+        content.extend_from_slice(b"ET");
+        let mut stream = format!("<< /Length {} >>\nstream\n", content.len()).into_bytes();
+        stream.extend_from_slice(&content);
+        stream.extend_from_slice(b"\nendstream");
+        write_obj(&mut pdf, &mut offsets, content_id, &stream);
+    }
     write_obj(
         &mut pdf,
         &mut offsets,
-        3,
-        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
-    );
-    let stream = format!(
-        "<< /Length {} >>\nstream\n{}\nendstream",
-        content_bytes.len(),
-        content
-    );
-    write_obj(&mut pdf, &mut offsets, 4, stream.as_bytes());
-    write_obj(
-        &mut pdf,
-        &mut offsets,
-        5,
-        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        font_id,
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
     );
 
     let xref_pos = pdf.len();
@@ -400,16 +460,30 @@ fn build_simple_pdf(title: &str, plain: &str) -> Result<Vec<u8>, String> {
     Ok(pdf)
 }
 
-fn pdf_escape(s: &str) -> String {
-    s.chars()
-        .map(|c| match c {
-            '\\' => "\\\\".into(),
-            '(' => "\\(".into(),
-            ')' => "\\)".into(),
-            c if c.is_ascii() && !c.is_control() => c.to_string(),
-            _ => " ".into(),
-        })
-        .collect()
+fn pdf_escape(s: &str) -> Vec<u8> {
+    let mut out = Vec::new();
+    for c in s.chars() {
+        match c {
+            '\\' | '(' | ')' => {
+                out.push(b'\\');
+                out.push(c as u8);
+            }
+            '\t' | '\n' | '\r' => out.push(b' '),
+            c if c.is_ascii() && !c.is_control() => out.push(c as u8),
+            c if (0xa0..=0xff).contains(&(c as u32)) => out.push(c as u8),
+            '€' => out.push(0x80),
+            '…' => out.push(0x85),
+            '‘' => out.push(0x91),
+            '’' => out.push(0x92),
+            '“' => out.push(0x93),
+            '”' => out.push(0x94),
+            '•' => out.push(0x95),
+            '–' => out.push(0x96),
+            '—' => out.push(0x97),
+            _ => out.push(b'?'),
+        }
+    }
+    out
 }
 
 #[cfg(test)]
@@ -419,13 +493,51 @@ mod tests {
     #[test]
     fn plain_strips_tags() {
         let p = html_to_plain("<p>Hi <b>there</b></p>");
-        assert!(p.contains("Hi"));
-        assert!(p.contains("there"));
+        assert_eq!(p, "Hi there");
+        assert_eq!(
+            html_to_plain("<p>A &amp; B<br>C</p><p>D&#233;</p>"),
+            "A & B\nC\n\nDé"
+        );
+    }
+
+    #[test]
+    fn markdown_keeps_paragraphs_and_unicode() {
+        assert_eq!(
+            html_to_markdown("<p>Résumé <strong>bold</strong></p><p>Next</p>"),
+            "Résumé **bold**\n\nNext"
+        );
+        assert_eq!(
+            html_to_markdown("<p><a href=\"https://example.com\">Link</a></p>"),
+            "[Link](https://example.com)"
+        );
+    }
+
+    #[test]
+    fn docx_round_trip_keeps_text_without_extra_title() {
+        let bytes = build_docx("File title", "A & B\n\nDéjà vu").unwrap();
+        let opened =
+            crate::files::open_bytes("file.docx", "file.docx", "docx", "File title", &bytes)
+                .unwrap();
+        assert!(opened.html.contains("A &amp; B"));
+        assert!(opened.html.contains("Déjà vu"));
+        assert!(!opened.html.contains("File title</p>"));
     }
 
     #[test]
     fn pdf_builds() {
-        let b = build_simple_pdf("T", "Hello world").unwrap();
+        let b = build_simple_pdf("T", "Café € —").unwrap();
         assert!(b.starts_with(b"%PDF"));
+        assert!(b.windows(3).any(|w| w == [0xe9, b' ', 0x80]));
+    }
+
+    #[test]
+    fn pdf_keeps_long_documents() {
+        let text = (0..150)
+            .map(|i| format!("Unique line {i}"))
+            .collect::<Vec<_>>()
+            .join("\n\n");
+        let pdf = build_simple_pdf("Long", &text).unwrap();
+        assert!(String::from_utf8_lossy(&pdf).contains("Unique line 149"));
+        assert!(String::from_utf8_lossy(&pdf).contains("/Count 7"));
     }
 }

@@ -101,7 +101,7 @@ async function testApi() {
   assert.ok(raw.body.length >= fixtureBytes.length * 0.9, 'raw size');
 
   // Import path — must return view_url, not multi-MB base64 dependency
-  const boundary = '----CognitionPdfTestBoundary';
+  const boundary = '----XWritePdfTestBoundary';
   const hello = fs.readFileSync(HELLO);
   const multipart = Buffer.concat([
     Buffer.from(
@@ -182,9 +182,9 @@ async function testUi() {
   try {
     await page.goto(BASE + '/', { waitUntil: 'networkidle', timeout: 30000 });
     const hasPdfJs = await page.evaluate(() => !!window.pdfjsLib);
-    const hasHelpers = await page.evaluate(() => !!window.CognitionPdf);
+    const hasHelpers = await page.evaluate(() => !!window.XWritePdf);
     assert.ok(hasPdfJs, 'pdfjsLib must load');
-    assert.ok(hasHelpers, 'CognitionPdf helpers must load');
+    assert.ok(hasHelpers, 'XWritePdf helpers must load');
 
     // Sidebar open multipage
     await page.waitForTimeout(400);

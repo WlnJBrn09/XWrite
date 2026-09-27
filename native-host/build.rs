@@ -14,10 +14,10 @@ fn main() {
         if ico.is_file() {
             res.set_icon(ico.to_str().expect("ico path utf-8"));
         }
-        res.set("ProductName", "Cognitience WP");
-        res.set("FileDescription", "Cognitience WP — local-first word processor");
-        res.set("CompanyName", "Cognitience");
-        res.set("LegalCopyright", "Cognitience");
+        res.set("ProductName", "XWrite");
+        res.set("FileDescription", "XWrite — local-first word processor");
+        res.set("CompanyName", "XWrite");
+        res.set("LegalCopyright", "XWrite");
         // AppUserModelID-friendly description for taskbar grouping.
         if let Err(e) = res.compile() {
             eprintln!("cargo:warning=winres failed (exe icon may be missing): {e}");

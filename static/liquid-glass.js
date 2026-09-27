@@ -1,5 +1,5 @@
 /**
- * Cognition WP — Liquid Glass material math + DOM driver.
+ * XWrite — Liquid Glass material math + DOM driver.
  * Pure functions are testable without a browser DOM.
  */
 (function (root, factory) {
@@ -7,7 +7,7 @@
   if (typeof module === 'object' && module.exports) {
     module.exports = api;
   }
-  root.CognitionLiquidGlass = api;
+  root.XSuiteLiquidGlass = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 

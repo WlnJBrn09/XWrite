@@ -8,9 +8,13 @@ use serde::{Deserialize, Serialize};
 use zip::ZipArchive;
 
 /// Extensions shown in the Documents sidebar (and generally openable as library files).
-const LIST_EXT: &[&str] = &["txt", "md", "markdown", "docx", "pdf"];
+const LIST_EXT: &[&str] = &[
+    "txt", "md", "markdown", "docx", "pdf", "html", "htm", "json", "cog",
+];
 /// Also openable via Open/Import, but not listed in the sidebar.
-const OPEN_EXT: &[&str] = &["txt", "md", "markdown", "docx", "pdf", "html", "htm", "json", "cog"];
+const OPEN_EXT: &[&str] = &[
+    "txt", "md", "markdown", "docx", "pdf", "html", "htm", "json", "cog",
+];
 
 #[derive(Debug, Clone, Serialize)]
 pub struct FileEntry {
@@ -71,7 +75,7 @@ impl std::fmt::Display for FileError {
 }
 
 pub fn resolve_documents_dir() -> PathBuf {
-    if let Ok(p) = std::env::var("COGNITION_DOCS_DIR") {
+    if let Ok(p) = std::env::var("XWRITE_DOCS_DIR") {
         return PathBuf::from(p);
     }
     dirs::document_dir().unwrap_or_else(|| {
@@ -142,7 +146,7 @@ fn kind_for_ext(ext: &str) -> &'static str {
         "docx" => "word",
         "pdf" => "pdf",
         "html" | "htm" => "html",
-        "json" | "cog" => "cognition",
+        "json" | "cog" => "xwrite",
         _ => "file",
     }
 }
@@ -277,7 +281,7 @@ pub fn open_bytes_with_options(
                 html: Option<String>,
             }
             let doc: Doc = serde_json::from_slice(bytes)
-                .map_err(|e| FileError::Other(format!("invalid cognition file: {e}")))?;
+                .map_err(|e| FileError::Other(format!("invalid XWrite file: {e}")))?;
             Ok(OpenedFile {
                 name: name.into(),
                 path: rel.into(),
@@ -285,7 +289,7 @@ pub fn open_bytes_with_options(
                 title: doc.title.unwrap_or_else(|| title.into()),
                 html: doc.html.unwrap_or_default(),
                 markdown: None,
-                format: "cognition".into(),
+                format: "xwrite".into(),
                 binary: false,
                 view_url: None,
                 binary_base64: None,
@@ -317,12 +321,12 @@ pub fn open_bytes_with_options(
             })
         }
         "pdf" => {
+            if !bytes.starts_with(b"%PDF-") {
+                return Err(FileError::Other("invalid PDF file".into()));
+            }
             // Display the real PDF in the client viewer — never dump raw streams as text.
             let view_url = if from_disk && !rel.is_empty() {
-                Some(format!(
-                    "/api/files/raw?path={}",
-                    urlencoding_encode(rel)
-                ))
+                Some(format!("/api/files/raw?path={}", urlencoding_encode(rel)))
             } else {
                 None
             };
@@ -594,19 +598,54 @@ fn xml_docx_to_text(xml: &str) -> String {
                 buf.clear();
             } else if t == "/w:t" {
                 in_t = false;
-                text.push_str(&buf);
-            } else if t == "w:p" || t.starts_with("w:p ") {
-                if !text.is_empty() && !text.ends_with('\n') {
-                    text.push('\n');
+                text.push_str(&decode_xml_text(&buf));
+            } else if t == "/w:p" {
+                if !text.is_empty() {
+                    text.push_str("\n\n");
                 }
             } else if t == "w:br" || t.starts_with("w:br ") || t == "w:br/" {
                 text.push('\n');
+            } else if t == "w:tab" || t.starts_with("w:tab ") || t == "w:tab/" {
+                text.push('\t');
             }
         } else if in_t {
             buf.push(c);
         }
     }
-    text
+    text.trim_end_matches('\n').to_string()
+}
+
+fn decode_xml_text(s: &str) -> String {
+    let mut out = String::new();
+    let mut rest = s;
+    while !rest.is_empty() {
+        if let Some(after) = rest.strip_prefix('&') {
+            if let Some(end) = after.find(';').filter(|n| *n <= 12) {
+                let entity = &after[..end];
+                let decoded = match entity {
+                    "amp" => Some('&'),
+                    "lt" => Some('<'),
+                    "gt" => Some('>'),
+                    "quot" => Some('"'),
+                    "apos" => Some('\''),
+                    e if e.starts_with("#x") => u32::from_str_radix(&e[2..], 16)
+                        .ok()
+                        .and_then(char::from_u32),
+                    e if e.starts_with('#') => e[1..].parse::<u32>().ok().and_then(char::from_u32),
+                    _ => None,
+                };
+                if let Some(c) = decoded {
+                    out.push(c);
+                    rest = &after[end + 1..];
+                    continue;
+                }
+            }
+        }
+        let c = rest.chars().next().unwrap();
+        out.push(c);
+        rest = &rest[c.len_utf8()..];
+    }
+    out
 }
 
 /// MIME type for a relative Documents path.
@@ -654,6 +693,12 @@ mod tests {
         assert!(h.contains("<p>"));
     }
 
+    #[test]
+    fn docx_text_decodes_entities_and_paragraphs() {
+        let xml = "<w:p><w:r><w:t>A &amp; B</w:t><w:tab/><w:t>C</w:t></w:r></w:p><w:p><w:r><w:t>D&#233;</w:t></w:r></w:p>";
+        assert_eq!(xml_docx_to_text(xml), "A & B\tC\n\nDé");
+    }
+
     /// Minimal valid single-page PDF bytes used by open tests.
     fn sample_pdf_bytes() -> Vec<u8> {
         br#"%PDF-1.4
@@ -682,10 +727,7 @@ startxref
 
     #[test]
     fn open_pdf_from_disk_is_binary_with_view_url() {
-        let dir = std::env::temp_dir().join(format!(
-            "cognition-pdf-open-{}",
-            std::process::id()
-        ));
+        let dir = std::env::temp_dir().join(format!("xwrite-pdf-open-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         let pdf_path = dir.join("fixture.pdf");
@@ -741,10 +783,7 @@ startxref
 
     #[test]
     fn list_includes_pdf() {
-        let dir = std::env::temp_dir().join(format!(
-            "cognition-pdf-list-{}",
-            std::process::id()
-        ));
+        let dir = std::env::temp_dir().join(format!("xwrite-pdf-list-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).unwrap();
         fs::write(dir.join("a.pdf"), sample_pdf_bytes()).unwrap();

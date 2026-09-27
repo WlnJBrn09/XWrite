@@ -17,7 +17,7 @@ function note(s) {
   lines.push(s);
 }
 
-note('Cognition WP — Liquid Glass structure audit');
+note('XWrite — Liquid Glass structure audit');
 note(new Date().toISOString());
 note('');
 

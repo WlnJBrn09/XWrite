@@ -1,8 +1,8 @@
 {
-  "name": "cognitience-wp",
+  "name": "xwrite",
   "version": "2.1.0",
-  "description": "Cognitience WP — local-first word processor with liquid glass UI and Rust backend",
-  "author": "Cognitience",
+  "description": "XWrite — local-first word processor with liquid glass UI and Rust backend",
+  "author": "XWrite",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -12,16 +12,13 @@
     "backend": "cargo run --release",
     "backend:build": "cargo build --release",
     "start": "cargo run",
-    "native": "cargo build --release && cargo build --release --manifest-path native-host/Cargo.toml && powershell -NoProfile -Command \"Start-Process -FilePath (Resolve-Path 'native-host/target/release/cognition-wp-native.exe') -WindowStyle Normal\"",
+    "native": "npm run native:build && node scripts/run-native.js",
     "native:build": "cargo build --release && cargo build --release --manifest-path native-host/Cargo.toml",
-    "native:headless": "cargo build --release && cargo build --release --manifest-path native-host/Cargo.toml && set COGNITION_NATIVE_HEADLESS_SECS=20&& native-host\\target\\release\\cognition-wp-native.exe --headless",
+    "native:headless": "npm run native:build && node scripts/run-native.js --headless",
     "icon": "node scripts/make-icon.js",
     "dist": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-native-win.ps1",
+    "dist:deb": "npm run native:build && python3 scripts/package-deb.py XWrite",
     "dist:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-native-win.ps1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/WlnJBrn09/CognitienceWP.git"
   },
   "devDependencies": {
     "png-to-ico": "^2.1.8"

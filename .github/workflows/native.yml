@@ -25,7 +25,7 @@ jobs:
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CognitienceWP-windows
+          name: XWrite-windows
           path: dist/*_win.zip
 
   macos:
@@ -40,18 +40,18 @@ jobs:
       - name: Stage portable layout
         run: |
           VER=$(node -p "require('./package.json').version")
-          OUT="dist/CognitienceWP_v${VER}_mac_$(uname -m)"
+          OUT="dist/XWrite_v${VER}_mac_$(uname -m)"
           mkdir -p "$OUT/backend" "$OUT/build"
-          cp native-host/target/release/cognition-wp-native "$OUT/CognitienceWP"
-          cp target/release/cognition-wp "$OUT/backend/cognition-wp"
-          chmod +x "$OUT/CognitienceWP" "$OUT/backend/cognition-wp"
+          cp native-host/target/release/xwrite-native "$OUT/XWrite"
+          cp target/release/xwrite "$OUT/backend/xwrite"
+          chmod +x "$OUT/XWrite" "$OUT/backend/xwrite"
           cp -R static "$OUT/static"
           if [ -f build/icon.png ]; then cp build/icon.png "$OUT/build/icon.png"; fi
-          (cd dist && zip -r "CognitienceWP_v${VER}_mac_$(uname -m).zip" "CognitienceWP_v${VER}_mac_$(uname -m)")
+          (cd dist && zip -r "XWrite_v${VER}_mac_$(uname -m).zip" "XWrite_v${VER}_mac_$(uname -m)")
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CognitienceWP-macos
+          name: XWrite-macos
           path: dist/*_mac_*.zip
 
   linux:
@@ -70,16 +70,16 @@ jobs:
       - name: Stage portable layout
         run: |
           VER=$(node -p "require('./package.json').version")
-          OUT="dist/CognitienceWP_v${VER}_linux_x64"
+          OUT="dist/XWrite_v${VER}_linux_x64"
           mkdir -p "$OUT/backend" "$OUT/build"
-          cp native-host/target/release/cognition-wp-native "$OUT/CognitienceWP"
-          cp target/release/cognition-wp "$OUT/backend/cognition-wp"
-          chmod +x "$OUT/CognitienceWP" "$OUT/backend/cognition-wp"
+          cp native-host/target/release/xwrite-native "$OUT/XWrite"
+          cp target/release/xwrite "$OUT/backend/xwrite"
+          chmod +x "$OUT/XWrite" "$OUT/backend/xwrite"
           cp -R static "$OUT/static"
           if [ -f build/icon.png ]; then cp build/icon.png "$OUT/build/icon.png"; fi
-          (cd dist && tar -czf "CognitienceWP_v${VER}_linux_x64.tar.gz" "CognitienceWP_v${VER}_linux_x64")
+          (cd dist && tar -czf "XWrite_v${VER}_linux_x64.tar.gz" "XWrite_v${VER}_linux_x64")
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CognitienceWP-linux
+          name: XWrite-linux
           path: dist/*_linux_*.tar.gz

@@ -195,9 +195,9 @@ assert(!/id="editor"[^>]*class="[^"]*liquid-glass/.test(html), 'editor is not li
 assert(html.includes('liquid-glass.js'), 'loads liquid-glass.js');
 
 // ── 9. script.js wires driver ────────────────────────────
-console.log('\n9. Frontend wires CognitionLiquidGlass.attach');
+console.log('\n9. Frontend wires XSuiteLiquidGlass.attach');
 const script = fs.readFileSync(scriptPath, 'utf8');
-assert(script.includes('CognitionLiquidGlass'), 'script references CognitionLiquidGlass');
+assert(script.includes('XSuiteLiquidGlass'), 'script references XSuiteLiquidGlass');
 assert(script.includes('.attach('), 'script calls attach()');
 assert(script.includes('text-loupe') || script.includes('textLoupe'), 'script wires text loupe');
 assert(script.includes('loupeContentOffset') || script.includes('LOUPE_SCALE'), 'script positions loupe content');

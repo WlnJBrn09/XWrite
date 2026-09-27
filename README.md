@@ -1,4 +1,4 @@
-# Cognition WP
+# XWrite
 
 Local-first word processor with an Apple-inspired liquid-glass UI and a **Rust** backend.
 
@@ -21,8 +21,8 @@ npm run native
 npm run dist          # portable zip under dist/
 ```
 
-Binary (dev): `native-host/target/release/cognition-wp-native.exe`  
-Portable package: `dist/CognitienceWP_v*_win.zip` → run `CognitienceWP.exe`
+Binary (dev): `native-host/target/release/xwrite-native.exe`
+Portable package: `dist/XWrite_v*_win.zip` → run `XWrite.exe`
 
 See `native-host/README.md`.
 
@@ -39,14 +39,18 @@ Optional environment variables:
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `PORT` | `8787` | HTTP port (localhost only) |
-| `COGNITION_DATA_DIR` | `./documents` | Where `.json` documents are stored |
-| `COGNITION_STATIC_DIR` | `./static` | Frontend assets |
+| `XWRITE_DATA_DIR` | `./documents` | Where `.json` documents are stored |
+| `XWRITE_STATIC_DIR` | `./static` | Frontend assets |
 
 ## Features
 
 - **Apple-style Liquid Glass** chrome
 - Local document create / open / auto-save / star
 - Fonts, colors, highlight, bold/italic/underline, lists, links, print
+
+## Files
+
+Open TXT, Markdown, HTML, DOCX, PDF, and XWrite JSON files from the Documents library or the file picker. Export TXT, Markdown, DOCX, and PDF. PDF exports paginate long documents and preserve Western European characters and common punctuation. DOCX and PDF exports currently contain the document text; use the app's local JSON documents to retain editor formatting and embedded objects.
 
 ## Tests
 

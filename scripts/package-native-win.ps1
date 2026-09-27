@@ -1,12 +1,12 @@
-# Package Cognitience WP as a portable native Windows folder + zip.
-# Layout: dist/CognitienceWP_vX.Y.Z_win/{CognitienceWP.exe, backend/, static/, build/}
+# Package XWrite as a portable native Windows folder + zip.
+# Layout: dist/XWrite_vX.Y.Z_win/{XWrite.exe, backend/, static/, build/}
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 $pkg = Get-Content (Join-Path $root "package.json") -Raw | ConvertFrom-Json
 $version = $pkg.version
-$product = "CognitienceWP"
+$product = "XWrite"
 $outName = "${product}_v${version}_win"
 $dist = Join-Path $root "dist"
 $stage = Join-Path $dist $outName
@@ -21,8 +21,8 @@ New-Item -ItemType Directory -Force -Path $stage | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $stage "backend") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $stage "build") | Out-Null
 
-Copy-Item (Join-Path $root "native-host\target\release\cognition-wp-native.exe") (Join-Path $stage "CognitienceWP.exe")
-Copy-Item (Join-Path $root "target\release\cognition-wp.exe") (Join-Path $stage "backend\cognition-wp.exe")
+Copy-Item (Join-Path $root "native-host\target\release\xwrite-native.exe") (Join-Path $stage "XWrite.exe")
+Copy-Item (Join-Path $root "target\release\xwrite.exe") (Join-Path $stage "backend\xwrite.exe")
 Copy-Item -Recurse (Join-Path $root "static") (Join-Path $stage "static")
 if (Test-Path (Join-Path $root "build\icon.ico")) {
   Copy-Item (Join-Path $root "build\icon.ico") (Join-Path $stage "build\icon.ico")

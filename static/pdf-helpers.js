@@ -122,5 +122,5 @@
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = api;
   }
-  root.CognitionPdf = api;
+  root.XWritePdf = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

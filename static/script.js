@@ -209,7 +209,7 @@
 
   function setTitle(raw) {
     const title = (raw || '').trim() || 'Untitled document';
-    document.title = `${title} — Cognition WP`;
+    document.title = `${title} — XWrite`;
   }
 
   function closeMenus() {
@@ -478,6 +478,7 @@
   });
 
   async function exportAs(format) {
+    const rawMarkdown = mdRawMode ? mdRaw.value : null;
     if (mdRawMode) {
       mdSource = mdRaw.value;
       editor.innerHTML = clientMarkdownToHtml(mdSource);
@@ -492,7 +493,7 @@
           format,
           title,
           html: editor.innerHTML,
-          markdown: mdSource,
+          markdown: rawMarkdown,
         }),
       });
       if (!res.ok) {
@@ -510,7 +511,7 @@
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(a.href);
+      setTimeout(() => URL.revokeObjectURL(a.href), 60000);
       setStatus('Exported ' + filename);
     } catch (e) {
       setStatus(e.message || 'Export failed', 'error');
@@ -666,8 +667,8 @@
 
     // Place magnified content so focus sits at loupe center
     const off =
-      window.CognitionLiquidGlass && window.CognitionLiquidGlass.loupeContentOffset
-        ? window.CognitionLiquidGlass.loupeContentOffset(focusX, focusY, LOUPE_SIZE, LOUPE_SCALE)
+      window.XSuiteLiquidGlass && window.XSuiteLiquidGlass.loupeContentOffset
+        ? window.XSuiteLiquidGlass.loupeContentOffset(focusX, focusY, LOUPE_SIZE, LOUPE_SCALE)
         : { tx: half - focusX * LOUPE_SCALE, ty: half - focusY * LOUPE_SCALE, scale: LOUPE_SCALE };
     textLoupeContent.style.transform =
       'translate3d(' + off.tx + 'px,' + off.ty + 'px,0) scale(' + off.scale + ')';
@@ -737,8 +738,8 @@
           const rect = range.getBoundingClientRect();
           const paperRect = paper.getBoundingClientRect();
           const layout =
-            window.CognitionLiquidGlass && window.CognitionLiquidGlass.floatingToolbarLayout
-              ? window.CognitionLiquidGlass.floatingToolbarLayout(rect, paperRect, {
+            window.XSuiteLiquidGlass && window.XSuiteLiquidGlass.floatingToolbarLayout
+              ? window.XSuiteLiquidGlass.floatingToolbarLayout(rect, paperRect, {
                   barHeight: 44,
                   gap: 10,
                   pad: 12,
@@ -921,6 +922,8 @@
 
   async function openServerPath(path) {
     try {
+      clearTimeout(saveTimer);
+      if (dirty) await saveDocument({ quiet: true });
       setStatus('Opening…', 'saving');
       const doc = await api('/files/open', { method: 'POST', body: JSON.stringify({ path }) });
       loadOpened(doc);
@@ -1053,7 +1056,7 @@
 
   /**
    * @param {string | { kind: string, value: any } | null} source
-   *   URL string, or resolved { kind: 'url'|'data', value } from CognitionPdf.resolvePdfSource
+   *   URL string, or resolved { kind: 'url'|'data', value } from XWritePdf.resolvePdfSource
    */
   async function showPdfView(source) {
     setMarkdownMode(false);
@@ -1068,7 +1071,7 @@
     }
     if (pdfPages) pdfPages.innerHTML = '<p class="tabs-hint">Loading PDF…</p>';
 
-    const helpers = window.CognitionPdf;
+    const helpers = window.XWritePdf;
     let resolved =
       source && typeof source === 'object' && source.kind
         ? source
@@ -1174,7 +1177,7 @@
     dirty = false;
 
     // PDF: embed real PDF viewer (never dump binary streams into the editor)
-    const helpers = window.CognitionPdf;
+    const helpers = window.XWritePdf;
     const isPdf = helpers
       ? helpers.isPdfDoc(doc)
       : doc.format === 'pdf' || doc.binary || (doc.ext || '').toLowerCase() === 'pdf';
@@ -1253,7 +1256,12 @@
   }
 
   async function importLocalFiles(fileList) {
-    const helpers = window.CognitionPdf;
+    clearTimeout(saveTimer);
+    if (dirty) {
+      try { await saveDocument({ quiet: true }); }
+      catch { return; }
+    }
+    const helpers = window.XWritePdf;
     for (const file of fileList) {
       const isPdf = helpers
         ? helpers.isPdfFileName(file.name, file.type)
@@ -1270,6 +1278,7 @@
         setStatus('Opening ' + file.name + '…', 'saving');
         const doc = await api('/files/import', { method: 'POST', body: fd });
         loadOpened(doc);
+        await saveDocument({ quiet: true });
       } catch (e) {
         // Fallback: client-side for images / plain text
         if (file.type.startsWith('image/')) {
@@ -1287,6 +1296,7 @@
               markdown: text,
               format: 'markdown',
             });
+            await saveDocument({ quiet: true });
           } else {
             loadOpened({
               title: file.name.replace(/\.[^.]+$/, ''),
@@ -1298,6 +1308,7 @@
                 .join(''),
               format: 'text',
             });
+            await saveDocument({ quiet: true });
           }
         } else {
           setStatus(e.message || 'Import failed', 'error');
@@ -1365,6 +1376,7 @@
   }
 
   async function newDocument() {
+    clearTimeout(saveTimer);
     if (dirty) {
       try {
         await saveDocument({ quiet: true });
@@ -1903,7 +1915,7 @@
     const t = theme === 'dark' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', t);
     try {
-      localStorage.setItem('cognition-theme', t);
+      localStorage.setItem('xwrite-theme', t);
     } catch {
       /* ignore */
     }
@@ -1924,7 +1936,7 @@
   try {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     mq.addEventListener('change', (e) => {
-      if (!localStorage.getItem('cognition-theme')) {
+      if (!localStorage.getItem('xwrite-theme')) {
         applyTheme(e.matches ? 'dark' : 'light');
       }
     });
@@ -1954,17 +1966,22 @@
         docsFolderLabel.title = health.documents_dir;
       }
       await refreshFileList();
+      const launchToken = new URLSearchParams(window.location.search).get('launch');
+      if (launchToken) {
+        const opened = await api('/files/launch?token=' + encodeURIComponent(launchToken));
+        loadOpened(opened);
+      }
       placeCaretAtEnd(editor);
     } catch (e) {
-      setStatus('Offline UI mode', 'error');
+      setStatus(e.message || 'Could not connect to local API', 'error');
       placeCaretAtEnd(editor);
     }
   })();
 
-  if (window.CognitionLiquidGlass && typeof window.CognitionLiquidGlass.attach === 'function') {
-    window.CognitionLiquidGlass.attach({
+  if (window.XSuiteLiquidGlass && typeof window.XSuiteLiquidGlass.attach === 'function') {
+    window.XSuiteLiquidGlass.attach({
       scrollEl: document.getElementById('center'),
-      getSurfaces: () => window.CognitionLiquidGlass.querySurfaces(document),
+      getSurfaces: () => window.XSuiteLiquidGlass.querySurfaces(document),
     });
   }
 })();
