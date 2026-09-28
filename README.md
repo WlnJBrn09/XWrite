@@ -1,6 +1,6 @@
 # XWrite
 
-Local-first word processor with an Apple-inspired liquid-glass UI and a **Rust** backend.
+Local-first word processor with a CruxOS-styled UI and a **Rust** backend.
 
 Nothing is uploaded to the cloud. Documents are JSON files on disk.
 
@@ -44,7 +44,7 @@ Optional environment variables:
 
 ## Features
 
-- **Apple-style Liquid Glass** chrome
+- CruxOS styling: opaque monochrome chrome, one green accent for focus, toggles and selection, Phosphor icons, light and dark themes that follow the system
 - Local document create / open / auto-save / star
 - Fonts, colors, highlight, bold/italic/underline, lists, links, print
 
@@ -56,7 +56,7 @@ Open TXT, Markdown, HTML, DOCX, PDF, and XWrite JSON files from the Documents li
 
 ```bash
 npm test
-npm run test:glass
+npm run test:design
 ```
 
 ## License

@@ -1,14 +1,14 @@
 {
   "name": "xwrite",
   "version": "2.1.0",
-  "description": "XWrite — local-first word processor with liquid glass UI and Rust backend",
+  "description": "XWrite — local-first word processor with CruxOS UI and Rust backend",
   "author": "XWrite",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test": "node scripts/test-liquid-glass.js && node scripts/test-pdf-helpers.js",
+    "test": "node scripts/test-design.js && node scripts/test-selection-layout.js && node scripts/test-pdf-helpers.js",
     "test:pdf": "node scripts/test-pdf-helpers.js && node scripts/test-pdf-open.js",
-    "test:glass": "node scripts/test-liquid-glass.js && node scripts/verify-glass-structure.js",
+    "test:design": "node scripts/test-design.js",
     "backend": "cargo run --release",
     "backend:build": "cargo build --release",
     "start": "cargo run",

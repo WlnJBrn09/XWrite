@@ -19,39 +19,29 @@
       }
     })();
   </script>
-  <link rel="icon" type="image/png" href="assets/logo.png"/>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg"/>
 
-
-
+  <link rel="stylesheet" href="crux.css"/>
 
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <svg class="lg-filter-defs" aria-hidden="true" focusable="false">
-    <defs>
-      <filter id="lg-refract" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.018 0.03" numOctaves="2" seed="3" result="noise"/>
-        <feGaussianBlur in="noise" stdDeviation="0.6" result="softNoise"/>
-        <feDisplacementMap in="SourceGraphic" in2="softNoise" scale="6" xChannelSelector="R" yChannelSelector="G"/>
-      </filter>
-    </defs>
-  </svg>
 
   <input type="file" id="file-open-input" class="sr-only" accept=".md,.markdown,.txt,.docx,.pdf,.html,.htm,.json,.cog,image/*" multiple/>
   <input type="file" id="image-input" class="sr-only" accept="image/*"/>
 
   <div id="app">
-    <header id="header" class="liquid-glass liquid-glass--heavy glass glass-heavy">
+    <header id="header" class="panel">
       <div class="header-top">
         <div class="header-left">
           <button type="button" class="docs-icon-btn pressable" aria-label="XWrite" title="XWrite">
-            <img src="assets/logo.png" alt="XWrite" class="app-logo" width="40" height="40"/>
+            <img src="assets/logo.svg" alt="XWrite" class="app-logo" width="40" height="40"/>
           </button>
           <div class="title-block">
             <div class="title-row">
               <div class="doc-title" id="doc-title" contenteditable="true" spellcheck="false" role="textbox" aria-label="Document title">Untitled document</div>
               <button type="button" class="icon-btn pressable" id="star-btn" title="Star" aria-label="Star" aria-pressed="false">
-                <span class="material-symbols-outlined icon-star" aria-hidden="true">star</span>
+                <span class="icon icon-star" aria-hidden="true">star</span>
               </button>
               <span class="status-pill" id="status-text" aria-live="polite">Saved locally</span>
             </div>
@@ -59,44 +49,44 @@
         </div>
         <div class="header-actions">
           <button type="button" class="glass-btn pressable hidden" id="md-toggle" title="Toggle raw Markdown" aria-pressed="false">
-            <span class="material-symbols-outlined" aria-hidden="true">code</span>
+            <span class="icon" aria-hidden="true">code</span>
             <span id="md-toggle-label">Rendered MD</span>
           </button>
           <button type="button" class="glass-btn pressable" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
-            <span class="material-symbols-outlined icon-light" aria-hidden="true">dark_mode</span>
-            <span class="material-symbols-outlined icon-dark" aria-hidden="true">light_mode</span>
+            <span class="icon icon-light" aria-hidden="true">moon</span>
+            <span class="icon icon-dark" aria-hidden="true">sun</span>
           </button>
           <button type="button" class="glass-btn pressable" id="save-btn" title="Save (Ctrl+S)" aria-label="Save">
-            <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            <span class="icon" aria-hidden="true">floppy-disk</span>
             Save
           </button>
         </div>
       </div>
 
       <div class="toolbar-area">
-        <div class="toolbar-pill liquid-glass liquid-glass--light glass glass-light" id="toolbar" role="toolbar" aria-label="Formatting">
+        <div class="toolbar-pill panel panel--muted" id="toolbar" role="toolbar" aria-label="Formatting">
           <div class="toolbar-scroll">
             <div class="insert-wrap">
               <button type="button" class="t-icon pressable" id="insert-btn" title="Insert" aria-label="Insert" aria-haspopup="menu" aria-expanded="false">
-                <span class="material-symbols-outlined" aria-hidden="true">add_box</span>
+                <span class="icon" aria-hidden="true">plus-square</span>
               </button>
             </div>
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon pressable" id="undo-btn" title="Undo (Ctrl+Z)" aria-label="Undo">
-              <span class="material-symbols-outlined" aria-hidden="true">undo</span>
+              <span class="icon" aria-hidden="true">arrow-counter-clockwise</span>
             </button>
             <button type="button" class="t-icon pressable" id="redo-btn" title="Redo (Ctrl+Y)" aria-label="Redo">
-              <span class="material-symbols-outlined" aria-hidden="true">redo</span>
+              <span class="icon" aria-hidden="true">arrow-clockwise</span>
             </button>
             <button type="button" class="t-icon pressable" id="print-btn" title="Print (Ctrl+P)" aria-label="Print">
-              <span class="material-symbols-outlined" aria-hidden="true">print</span>
+              <span class="icon" aria-hidden="true">printer</span>
             </button>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <div class="style-wrap">
               <button type="button" class="t-drop pressable" id="style-btn" title="Paragraph style" aria-label="Paragraph style" aria-haspopup="listbox" aria-expanded="false">
                 <span id="style-label">Normal text</span>
-                <span class="material-symbols-outlined sm" aria-hidden="true">arrow_drop_down</span>
+                <span class="icon sm" aria-hidden="true">caret-down</span>
               </button>
             </div>
             <div class="v-sep" role="separator" aria-hidden="true"></div>
@@ -104,108 +94,108 @@
             <div class="font-wrap">
               <button type="button" class="t-drop pressable" id="font-btn" title="Font" aria-label="Font" aria-haspopup="listbox" aria-expanded="false">
                 <span id="font-label">Inter</span>
-                <span class="material-symbols-outlined sm" aria-hidden="true">arrow_drop_down</span>
+                <span class="icon sm" aria-hidden="true">caret-down</span>
               </button>
             </div>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
-            <div class="font-size-box glass-inset" role="group" aria-label="Font size">
+            <div class="font-size-box inset-field" role="group" aria-label="Font size">
               <button type="button" class="t-icon mini pressable" id="fs-minus" title="Decrease font size" aria-label="Decrease font size">
-                <span class="material-symbols-outlined" aria-hidden="true">remove</span>
+                <span class="icon" aria-hidden="true">minus</span>
               </button>
               <input type="text" class="fs-val" id="fs-val" value="12" inputmode="numeric" aria-label="Font size" title="Click to type size"/>
               <button type="button" class="t-icon mini pressable" id="fs-plus" title="Increase font size" aria-label="Increase font size">
-                <span class="material-symbols-outlined" aria-hidden="true">add</span>
+                <span class="icon" aria-hidden="true">plus</span>
               </button>
             </div>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon fmt pressable" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold" aria-pressed="false">
-              <span class="material-symbols-outlined" aria-hidden="true">format_bold</span>
+              <span class="icon" aria-hidden="true">text-b</span>
             </button>
             <button type="button" class="t-icon fmt pressable" data-cmd="italic" title="Italic (Ctrl+I)" aria-label="Italic" aria-pressed="false">
-              <span class="material-symbols-outlined" aria-hidden="true">format_italic</span>
+              <span class="icon" aria-hidden="true">text-italic</span>
             </button>
             <button type="button" class="t-icon fmt pressable" data-cmd="underline" title="Underline (Ctrl+U)" aria-label="Underline" aria-pressed="false">
-              <span class="material-symbols-outlined" aria-hidden="true">format_underlined</span>
+              <span class="icon" aria-hidden="true">text-underline</span>
             </button>
             <button type="button" class="t-icon pressable" id="color-btn" title="Text color" aria-label="Text color" aria-haspopup="dialog" aria-expanded="false">
-              <span class="material-symbols-outlined" aria-hidden="true">format_color_text</span>
+              <span class="icon" aria-hidden="true">text-a-underline</span>
               <i class="col-bar" id="col-bar" aria-hidden="true"></i>
             </button>
             <button type="button" class="t-icon pressable" id="highlight-btn" title="Highlight color" aria-label="Highlight color" aria-haspopup="dialog" aria-expanded="false">
-              <span class="material-symbols-outlined" aria-hidden="true">ink_highlighter</span>
+              <span class="icon" aria-hidden="true">highlighter</span>
               <i class="hl-bar" id="hl-bar" aria-hidden="true"></i>
             </button>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon pressable" id="link-btn" title="Insert link" aria-label="Insert link">
-              <span class="material-symbols-outlined" aria-hidden="true">link</span>
+              <span class="icon" aria-hidden="true">link</span>
             </button>
             <button type="button" class="t-icon pressable" id="image-btn" title="Insert image" aria-label="Insert image">
-              <span class="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
+              <span class="icon" aria-hidden="true">image</span>
             </button>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon align pressable" data-align="left" title="Align left" aria-label="Align left" aria-pressed="true">
-              <span class="material-symbols-outlined" aria-hidden="true">format_align_left</span>
+              <span class="icon" aria-hidden="true">text-align-left</span>
             </button>
             <button type="button" class="t-icon align pressable" data-align="center" title="Align center" aria-label="Align center" aria-pressed="false">
-              <span class="material-symbols-outlined" aria-hidden="true">format_align_center</span>
+              <span class="icon" aria-hidden="true">text-align-center</span>
             </button>
             <button type="button" class="t-icon align pressable" data-align="right" title="Align right" aria-label="Align right" aria-pressed="false">
-              <span class="material-symbols-outlined" aria-hidden="true">format_align_right</span>
+              <span class="icon" aria-hidden="true">text-align-right</span>
             </button>
             <button type="button" class="t-icon align pressable" data-align="justify" title="Justify" aria-label="Justify" aria-pressed="false">
-              <span class="material-symbols-outlined" aria-hidden="true">format_align_justify</span>
+              <span class="icon" aria-hidden="true">text-align-justify</span>
             </button>
             <div class="spacing-wrap">
               <button type="button" class="t-icon pressable" id="spacing-btn" title="Line spacing" aria-label="Line spacing" aria-haspopup="listbox" aria-expanded="false">
-                <span class="material-symbols-outlined" aria-hidden="true">format_line_spacing</span>
+                <span class="icon" aria-hidden="true">arrows-vertical</span>
               </button>
             </div>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon pressable" id="ul-btn" title="Bulleted list" aria-label="Bulleted list">
-              <span class="material-symbols-outlined" aria-hidden="true">format_list_bulleted</span>
+              <span class="icon" aria-hidden="true">list-bullets</span>
             </button>
             <button type="button" class="t-icon pressable" id="ol-btn" title="Numbered list" aria-label="Numbered list">
-              <span class="material-symbols-outlined" aria-hidden="true">format_list_numbered</span>
+              <span class="icon" aria-hidden="true">list-numbers</span>
             </button>
             <button type="button" class="t-icon pressable" id="outdent-btn" title="Decrease indent" aria-label="Decrease indent">
-              <span class="material-symbols-outlined" aria-hidden="true">format_indent_decrease</span>
+              <span class="icon" aria-hidden="true">text-outdent</span>
             </button>
             <button type="button" class="t-icon pressable" id="indent-btn" title="Increase indent" aria-label="Increase indent">
-              <span class="material-symbols-outlined" aria-hidden="true">format_indent_increase</span>
+              <span class="icon" aria-hidden="true">text-indent</span>
             </button>
             <button type="button" class="t-icon pressable" id="clear-fmt-btn" title="Clear formatting" aria-label="Clear formatting">
-              <span class="material-symbols-outlined" aria-hidden="true">format_clear</span>
+              <span class="icon" aria-hidden="true">text-t-slash</span>
             </button>
           </div>
         </div>
 
-        <div id="insert-menu" class="glass-menu liquid-glass liquid-glass--heavy hidden" role="menu" aria-label="Insert">
+        <div id="insert-menu" class="glass-menu hidden" role="menu" aria-label="Insert">
           <button type="button" class="menu-option" data-insert="pie" role="menuitem">
-            <span class="material-symbols-outlined" aria-hidden="true">pie_chart</span> Pie chart
+            <span class="icon" aria-hidden="true">chart-pie-slice</span> Pie chart
           </button>
           <button type="button" class="menu-option" data-insert="bar" role="menuitem">
-            <span class="material-symbols-outlined" aria-hidden="true">bar_chart</span> Bar graph
+            <span class="icon" aria-hidden="true">chart-bar</span> Bar graph
           </button>
           <button type="button" class="menu-option" data-insert="line" role="menuitem">
-            <span class="material-symbols-outlined" aria-hidden="true">show_chart</span> Line graph
+            <span class="icon" aria-hidden="true">chart-line</span> Line graph
           </button>
           <button type="button" class="menu-option" data-insert="sheet" role="menuitem">
-            <span class="material-symbols-outlined" aria-hidden="true">table</span> Sheet
+            <span class="icon" aria-hidden="true">table</span> Sheet
           </button>
           <button type="button" class="menu-option" data-insert="drawing" role="menuitem">
-            <span class="material-symbols-outlined" aria-hidden="true">draw</span> Drawing
+            <span class="icon" aria-hidden="true">pen-nib</span> Drawing
           </button>
           <button type="button" class="menu-option" data-insert="divider" role="menuitem">
-            <span class="material-symbols-outlined" aria-hidden="true">horizontal_rule</span> Line divider
+            <span class="icon" aria-hidden="true">minus</span> Line divider
           </button>
         </div>
 
-        <div id="style-menu" class="glass-menu liquid-glass liquid-glass--heavy hidden" role="listbox" aria-label="Paragraph style">
+        <div id="style-menu" class="glass-menu hidden" role="listbox" aria-label="Paragraph style">
           <button type="button" class="menu-option" data-style="p">Normal text</button>
           <button type="button" class="menu-option" data-style="h1" style="font-size:1.6em;font-weight:700">Heading 1</button>
           <button type="button" class="menu-option" data-style="h2" style="font-size:1.35em;font-weight:700">Heading 2</button>
@@ -215,14 +205,14 @@
           <button type="button" class="menu-option" data-style="h6" style="font-size:0.85em;font-weight:600">Heading 6</button>
         </div>
 
-        <div id="spacing-menu" class="glass-menu liquid-glass liquid-glass--heavy hidden" role="listbox" aria-label="Line spacing">
+        <div id="spacing-menu" class="glass-menu hidden" role="listbox" aria-label="Line spacing">
           <button type="button" class="menu-option" data-spacing="1">Single</button>
           <button type="button" class="menu-option" data-spacing="1.15">1.15</button>
           <button type="button" class="menu-option" data-spacing="1.5">1.5</button>
           <button type="button" class="menu-option active" data-spacing="2">Double</button>
         </div>
 
-        <div id="font-menu" class="glass-menu liquid-glass liquid-glass--heavy hidden" role="listbox" aria-label="Font family">
+        <div id="font-menu" class="glass-menu hidden" role="listbox" aria-label="Font family">
           <button type="button" class="font-option" data-font="Inter" style="font-family:Inter,sans-serif">Inter</button>
           <button type="button" class="font-option" data-font="Roboto" style="font-family:Roboto,sans-serif">Roboto</button>
           <button type="button" class="font-option" data-font="Open Sans" style="font-family:'Open Sans',sans-serif">Open Sans</button>
@@ -237,12 +227,12 @@
           <button type="button" class="font-option" data-font="Courier New" style="font-family:'Courier New',monospace">Courier New</button>
         </div>
 
-        <div id="picker" class="picker liquid-glass liquid-glass--heavy glass glass-heavy hidden" role="dialog" aria-label="Text color" aria-hidden="true">
+        <div id="picker" class="picker panel panel--floating hidden" role="dialog" aria-label="Text color" aria-hidden="true">
           <div class="picker-title">Text color</div>
           <div class="colors" id="text-colors" role="listbox"></div>
         </div>
 
-        <div id="hl-picker" class="picker liquid-glass liquid-glass--heavy glass glass-heavy hidden" role="dialog" aria-label="Highlight color" aria-hidden="true">
+        <div id="hl-picker" class="picker panel panel--floating hidden" role="dialog" aria-label="Highlight color" aria-hidden="true">
           <div class="picker-title">Highlight</div>
           <button type="button" class="picker-action pressable" id="hl-none">None</button>
           <div class="colors highlight-colors" id="hl-colors" role="listbox"></div>
@@ -251,14 +241,14 @@
     </header>
 
     <div id="work">
-      <aside id="left" class="liquid-glass liquid-glass--medium glass glass-medium" aria-label="Documents">
+      <aside id="left" class="panel panel--muted" aria-label="Documents">
         <div class="sidebar-actions">
           <button type="button" class="sidebar-btn pressable" id="sidebar-new">
-            <span class="material-symbols-outlined" aria-hidden="true">note_add</span>
+            <span class="icon" aria-hidden="true">file-plus</span>
             New Document
           </button>
           <button type="button" class="sidebar-btn pressable" id="sidebar-open">
-            <span class="material-symbols-outlined" aria-hidden="true">folder_open</span>
+            <span class="icon" aria-hidden="true">folder-open</span>
             Open Document
           </button>
           <div class="export-block">
@@ -280,7 +270,7 @@
       <main id="center" aria-label="Document">
         <div id="editor-shell">
           <div id="ruler">
-            <div class="ruler-inner liquid-glass liquid-glass--light glass glass-light">
+            <div class="ruler-inner panel panel--muted">
               <div class="ruler-track" id="ruler-track">
                 <div class="ruler-ticks" id="ruler-ticks"></div>
                 <div class="ruler-numbers" id="ruler-numbers"></div>
@@ -293,18 +283,18 @@
             <div id="paper" class="paper-surface">
               <div id="editor" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="Document content" data-placeholder="Start writing…"></div>
               <textarea id="md-raw" class="hidden" spellcheck="false" aria-label="Raw Markdown"></textarea>
-              <div id="floating-toolbar" class="floating-glass liquid-glass liquid-glass--heavy hidden" role="toolbar" aria-label="Selection tools">
+              <div id="floating-toolbar" class="floating-glass hidden" role="toolbar" aria-label="Selection tools">
                 <button type="button" class="ft-btn pressable" title="Bold" data-ft="bold" aria-label="Bold">
-                  <span class="material-symbols-outlined" aria-hidden="true">format_bold</span>
+                  <span class="icon" aria-hidden="true">text-b</span>
                 </button>
                 <button type="button" class="ft-btn pressable" title="Italic" data-ft="italic" aria-label="Italic">
-                  <span class="material-symbols-outlined" aria-hidden="true">format_italic</span>
+                  <span class="icon" aria-hidden="true">text-italic</span>
                 </button>
                 <button type="button" class="ft-btn pressable" title="Underline" data-ft="underline" aria-label="Underline">
-                  <span class="material-symbols-outlined" aria-hidden="true">format_underlined</span>
+                  <span class="icon" aria-hidden="true">text-underline</span>
                 </button>
                 <button type="button" class="ft-btn pressable" title="Highlight" data-ft="highlight" aria-label="Highlight">
-                  <span class="material-symbols-outlined" aria-hidden="true">ink_highlighter</span>
+                  <span class="icon" aria-hidden="true">highlighter</span>
                 </button>
               </div>
             </div>
@@ -337,7 +327,7 @@
   <!-- Link dialog -->
   <div id="link-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="link-dialog-title">
     <div class="modal-backdrop" data-close="link"></div>
-    <div class="modal-card liquid-glass liquid-glass--heavy glass glass-heavy">
+    <div class="modal-card panel panel--floating">
       <h2 id="link-dialog-title" class="modal-title">Insert link</h2>
       <label class="field-label" for="link-text">Text to display</label>
       <input type="text" id="link-text" class="field-input" placeholder="Display text" autocomplete="off"/>
@@ -353,7 +343,7 @@
   <!-- Chart dialog -->
   <div id="chart-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="chart-dialog-title">
     <div class="modal-backdrop" data-close="chart"></div>
-    <div class="modal-card modal-wide liquid-glass liquid-glass--heavy glass glass-heavy">
+    <div class="modal-card modal-wide panel panel--floating">
       <h2 id="chart-dialog-title" class="modal-title">Chart</h2>
       <p class="field-hint">One label and value per line, e.g. <code>Apples, 12</code></p>
       <textarea id="chart-data" class="field-input field-area" rows="6">Apples, 12
@@ -370,7 +360,7 @@ Grapes, 6</textarea>
   <!-- Drawing dialog -->
   <div id="draw-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="draw-dialog-title">
     <div class="modal-backdrop" data-close="draw"></div>
-    <div class="modal-card modal-wide liquid-glass liquid-glass--heavy glass glass-heavy">
+    <div class="modal-card modal-wide panel panel--floating">
       <h2 id="draw-dialog-title" class="modal-title">Drawing</h2>
       <div class="draw-toolbar">
         <button type="button" class="export-chip pressable" id="draw-clear">Clear</button>
@@ -387,7 +377,7 @@ Grapes, 6</textarea>
 
   <script src="vendor/pdf.min.js"></script>
   <script src="pdf-helpers.js"></script>
-  <script src="liquid-glass.js"></script>
+  <script src="selection-layout.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

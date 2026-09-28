@@ -669,8 +669,8 @@
 
     // Place magnified content so focus sits at loupe center
     const off =
-      window.XSuiteLiquidGlass && window.XSuiteLiquidGlass.loupeContentOffset
-        ? window.XSuiteLiquidGlass.loupeContentOffset(focusX, focusY, LOUPE_SIZE, LOUPE_SCALE)
+      window.XSuiteSelectionLayout && window.XSuiteSelectionLayout.loupeContentOffset
+        ? window.XSuiteSelectionLayout.loupeContentOffset(focusX, focusY, LOUPE_SIZE, LOUPE_SCALE)
         : { tx: half - focusX * LOUPE_SCALE, ty: half - focusY * LOUPE_SCALE, scale: LOUPE_SCALE };
     textLoupeContent.style.transform =
       'translate3d(' + off.tx + 'px,' + off.ty + 'px,0) scale(' + off.scale + ')';
@@ -740,8 +740,8 @@
           const rect = range.getBoundingClientRect();
           const paperRect = paper.getBoundingClientRect();
           const layout =
-            window.XSuiteLiquidGlass && window.XSuiteLiquidGlass.floatingToolbarLayout
-              ? window.XSuiteLiquidGlass.floatingToolbarLayout(rect, paperRect, {
+            window.XSuiteSelectionLayout && window.XSuiteSelectionLayout.floatingToolbarLayout
+              ? window.XSuiteSelectionLayout.floatingToolbarLayout(rect, paperRect, {
                   barHeight: 44,
                   gap: 10,
                   pad: 12,
@@ -794,13 +794,13 @@
         btn.className = 'doc-item pressable' + (activeFilePath === f.path ? ' active' : '');
         const icon =
           f.kind === 'markdown'
-            ? 'draft'
+            ? 'file-md'
             : f.kind === 'word'
-              ? 'description'
+              ? 'file-doc'
               : f.kind === 'pdf'
-                ? 'picture_as_pdf'
-                : 'article';
-        btn.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true">${icon}</span><span class="doc-item-title"></span><span class="doc-ext"></span>`;
+                ? 'file-pdf'
+                : 'file-text';
+        btn.innerHTML = `<span class="icon" aria-hidden="true">${icon}</span><span class="doc-item-title"></span><span class="doc-ext"></span>`;
         btn.querySelector('.doc-item-title').textContent = f.name;
         btn.querySelector('.doc-ext').textContent = f.ext;
         btn.title = f.path;
@@ -1812,7 +1812,7 @@
     if (document.activeElement === editor || editor.contains(document.activeElement)) sync();
   });
 
-  // Text loupe: glass magnifier while dragging to select (WWDC liquid lens)
+  // Text loupe: magnifier while dragging to select
   editor.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 || !loupeAllowed()) return;
     loupeDragging = true;
@@ -1921,7 +1921,7 @@
     } catch {
       /* ignore */
     }
-    if (metaTheme) metaTheme.setAttribute('content', t === 'dark' ? '#000000' : '#ffffff');
+    if (metaTheme) metaTheme.setAttribute('content', t === 'dark' ? '#0a0a0b' : '#ffffff');
     if (themeToggle) {
       themeToggle.title = t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
       themeToggle.setAttribute('aria-label', themeToggle.title);
@@ -1979,11 +1979,4 @@
       placeCaretAtEnd(editor);
     }
   })();
-
-  if (window.XSuiteLiquidGlass && typeof window.XSuiteLiquidGlass.attach === 'function') {
-    window.XSuiteLiquidGlass.attach({
-      scrollEl: document.getElementById('center'),
-      getSurfaces: () => window.XSuiteLiquidGlass.querySurfaces(document),
-    });
-  }
 })();
