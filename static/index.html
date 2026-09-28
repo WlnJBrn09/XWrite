@@ -21,6 +21,7 @@
   </script>
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg"/>
 
+  <link rel="stylesheet" href="assets/phosphor.css"/>
   <link rel="stylesheet" href="crux.css"/>
 
   <link rel="stylesheet" href="style.css"/>
@@ -41,7 +42,7 @@
             <div class="title-row">
               <div class="doc-title" id="doc-title" contenteditable="true" spellcheck="false" role="textbox" aria-label="Document title">Untitled document</div>
               <button type="button" class="icon-btn pressable" id="star-btn" title="Star" aria-label="Star" aria-pressed="false">
-                <span class="icon icon-star" aria-hidden="true">star</span>
+                <span class="ph ph-star icon-star" aria-hidden="true"></span>
               </button>
               <span class="status-pill" id="status-text" aria-live="polite">Saved locally</span>
             </div>
@@ -49,15 +50,15 @@
         </div>
         <div class="header-actions">
           <button type="button" class="glass-btn pressable hidden" id="md-toggle" title="Toggle raw Markdown" aria-pressed="false">
-            <span class="icon" aria-hidden="true">code</span>
+            <span class="ph ph-code" aria-hidden="true"></span>
             <span id="md-toggle-label">Rendered MD</span>
           </button>
           <button type="button" class="glass-btn pressable" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
-            <span class="icon icon-light" aria-hidden="true">moon</span>
-            <span class="icon icon-dark" aria-hidden="true">sun</span>
+            <span class="ph ph-moon icon-light" aria-hidden="true"></span>
+            <span class="ph ph-sun icon-dark" aria-hidden="true"></span>
           </button>
           <button type="button" class="glass-btn pressable" id="save-btn" title="Save (Ctrl+S)" aria-label="Save">
-            <span class="icon" aria-hidden="true">floppy-disk</span>
+            <span class="ph ph-floppy-disk" aria-hidden="true"></span>
             Save
           </button>
         </div>
@@ -68,25 +69,25 @@
           <div class="toolbar-scroll">
             <div class="insert-wrap">
               <button type="button" class="t-icon pressable" id="insert-btn" title="Insert" aria-label="Insert" aria-haspopup="menu" aria-expanded="false">
-                <span class="icon" aria-hidden="true">plus-square</span>
+                <span class="ph ph-plus-square" aria-hidden="true"></span>
               </button>
             </div>
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon pressable" id="undo-btn" title="Undo (Ctrl+Z)" aria-label="Undo">
-              <span class="icon" aria-hidden="true">arrow-counter-clockwise</span>
+              <span class="ph ph-arrow-counter-clockwise" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon pressable" id="redo-btn" title="Redo (Ctrl+Y)" aria-label="Redo">
-              <span class="icon" aria-hidden="true">arrow-clockwise</span>
+              <span class="ph ph-arrow-clockwise" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon pressable" id="print-btn" title="Print (Ctrl+P)" aria-label="Print">
-              <span class="icon" aria-hidden="true">printer</span>
+              <span class="ph ph-printer" aria-hidden="true"></span>
             </button>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <div class="style-wrap">
               <button type="button" class="t-drop pressable" id="style-btn" title="Paragraph style" aria-label="Paragraph style" aria-haspopup="listbox" aria-expanded="false">
                 <span id="style-label">Normal text</span>
-                <span class="icon sm" aria-hidden="true">caret-down</span>
+                <span class="ph ph-caret-down sm" aria-hidden="true"></span>
               </button>
             </div>
             <div class="v-sep" role="separator" aria-hidden="true"></div>
@@ -94,104 +95,104 @@
             <div class="font-wrap">
               <button type="button" class="t-drop pressable" id="font-btn" title="Font" aria-label="Font" aria-haspopup="listbox" aria-expanded="false">
                 <span id="font-label">Inter</span>
-                <span class="icon sm" aria-hidden="true">caret-down</span>
+                <span class="ph ph-caret-down sm" aria-hidden="true"></span>
               </button>
             </div>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <div class="font-size-box inset-field" role="group" aria-label="Font size">
               <button type="button" class="t-icon mini pressable" id="fs-minus" title="Decrease font size" aria-label="Decrease font size">
-                <span class="icon" aria-hidden="true">minus</span>
+                <span class="ph ph-minus" aria-hidden="true"></span>
               </button>
               <input type="text" class="fs-val" id="fs-val" value="12" inputmode="numeric" aria-label="Font size" title="Click to type size"/>
               <button type="button" class="t-icon mini pressable" id="fs-plus" title="Increase font size" aria-label="Increase font size">
-                <span class="icon" aria-hidden="true">plus</span>
+                <span class="ph ph-plus" aria-hidden="true"></span>
               </button>
             </div>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon fmt pressable" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold" aria-pressed="false">
-              <span class="icon" aria-hidden="true">text-b</span>
+              <span class="ph ph-text-b" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon fmt pressable" data-cmd="italic" title="Italic (Ctrl+I)" aria-label="Italic" aria-pressed="false">
-              <span class="icon" aria-hidden="true">text-italic</span>
+              <span class="ph ph-text-italic" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon fmt pressable" data-cmd="underline" title="Underline (Ctrl+U)" aria-label="Underline" aria-pressed="false">
-              <span class="icon" aria-hidden="true">text-underline</span>
+              <span class="ph ph-text-underline" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon pressable" id="color-btn" title="Text color" aria-label="Text color" aria-haspopup="dialog" aria-expanded="false">
-              <span class="icon" aria-hidden="true">text-a-underline</span>
+              <span class="ph ph-text-a-underline" aria-hidden="true"></span>
               <i class="col-bar" id="col-bar" aria-hidden="true"></i>
             </button>
             <button type="button" class="t-icon pressable" id="highlight-btn" title="Highlight color" aria-label="Highlight color" aria-haspopup="dialog" aria-expanded="false">
-              <span class="icon" aria-hidden="true">highlighter</span>
+              <span class="ph ph-highlighter" aria-hidden="true"></span>
               <i class="hl-bar" id="hl-bar" aria-hidden="true"></i>
             </button>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon pressable" id="link-btn" title="Insert link" aria-label="Insert link">
-              <span class="icon" aria-hidden="true">link</span>
+              <span class="ph ph-link" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon pressable" id="image-btn" title="Insert image" aria-label="Insert image">
-              <span class="icon" aria-hidden="true">image</span>
+              <span class="ph ph-image" aria-hidden="true"></span>
             </button>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon align pressable" data-align="left" title="Align left" aria-label="Align left" aria-pressed="true">
-              <span class="icon" aria-hidden="true">text-align-left</span>
+              <span class="ph ph-text-align-left" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon align pressable" data-align="center" title="Align center" aria-label="Align center" aria-pressed="false">
-              <span class="icon" aria-hidden="true">text-align-center</span>
+              <span class="ph ph-text-align-center" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon align pressable" data-align="right" title="Align right" aria-label="Align right" aria-pressed="false">
-              <span class="icon" aria-hidden="true">text-align-right</span>
+              <span class="ph ph-text-align-right" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon align pressable" data-align="justify" title="Justify" aria-label="Justify" aria-pressed="false">
-              <span class="icon" aria-hidden="true">text-align-justify</span>
+              <span class="ph ph-text-align-justify" aria-hidden="true"></span>
             </button>
             <div class="spacing-wrap">
               <button type="button" class="t-icon pressable" id="spacing-btn" title="Line spacing" aria-label="Line spacing" aria-haspopup="listbox" aria-expanded="false">
-                <span class="icon" aria-hidden="true">arrows-vertical</span>
+                <span class="ph ph-arrows-vertical" aria-hidden="true"></span>
               </button>
             </div>
 
             <div class="v-sep" role="separator" aria-hidden="true"></div>
             <button type="button" class="t-icon pressable" id="ul-btn" title="Bulleted list" aria-label="Bulleted list">
-              <span class="icon" aria-hidden="true">list-bullets</span>
+              <span class="ph ph-list-bullets" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon pressable" id="ol-btn" title="Numbered list" aria-label="Numbered list">
-              <span class="icon" aria-hidden="true">list-numbers</span>
+              <span class="ph ph-list-numbers" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon pressable" id="outdent-btn" title="Decrease indent" aria-label="Decrease indent">
-              <span class="icon" aria-hidden="true">text-outdent</span>
+              <span class="ph ph-text-outdent" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon pressable" id="indent-btn" title="Increase indent" aria-label="Increase indent">
-              <span class="icon" aria-hidden="true">text-indent</span>
+              <span class="ph ph-text-indent" aria-hidden="true"></span>
             </button>
             <button type="button" class="t-icon pressable" id="clear-fmt-btn" title="Clear formatting" aria-label="Clear formatting">
-              <span class="icon" aria-hidden="true">text-t-slash</span>
+              <span class="ph ph-text-t-slash" aria-hidden="true"></span>
             </button>
           </div>
         </div>
 
         <div id="insert-menu" class="glass-menu hidden" role="menu" aria-label="Insert">
           <button type="button" class="menu-option" data-insert="pie" role="menuitem">
-            <span class="icon" aria-hidden="true">chart-pie-slice</span> Pie chart
+            <span class="ph ph-chart-pie-slice" aria-hidden="true"></span> Pie chart
           </button>
           <button type="button" class="menu-option" data-insert="bar" role="menuitem">
-            <span class="icon" aria-hidden="true">chart-bar</span> Bar graph
+            <span class="ph ph-chart-bar" aria-hidden="true"></span> Bar graph
           </button>
           <button type="button" class="menu-option" data-insert="line" role="menuitem">
-            <span class="icon" aria-hidden="true">chart-line</span> Line graph
+            <span class="ph ph-chart-line" aria-hidden="true"></span> Line graph
           </button>
           <button type="button" class="menu-option" data-insert="sheet" role="menuitem">
-            <span class="icon" aria-hidden="true">table</span> Sheet
+            <span class="ph ph-table" aria-hidden="true"></span> Sheet
           </button>
           <button type="button" class="menu-option" data-insert="drawing" role="menuitem">
-            <span class="icon" aria-hidden="true">pen-nib</span> Drawing
+            <span class="ph ph-pen-nib" aria-hidden="true"></span> Drawing
           </button>
           <button type="button" class="menu-option" data-insert="divider" role="menuitem">
-            <span class="icon" aria-hidden="true">minus</span> Line divider
+            <span class="ph ph-minus" aria-hidden="true"></span> Line divider
           </button>
         </div>
 
@@ -244,11 +245,11 @@
       <aside id="left" class="panel panel--muted" aria-label="Documents">
         <div class="sidebar-actions">
           <button type="button" class="sidebar-btn pressable" id="sidebar-new">
-            <span class="icon" aria-hidden="true">file-plus</span>
+            <span class="ph ph-file-plus" aria-hidden="true"></span>
             New Document
           </button>
           <button type="button" class="sidebar-btn pressable" id="sidebar-open">
-            <span class="icon" aria-hidden="true">folder-open</span>
+            <span class="ph ph-folder-open" aria-hidden="true"></span>
             Open Document
           </button>
           <div class="export-block">
@@ -285,16 +286,16 @@
               <textarea id="md-raw" class="hidden" spellcheck="false" aria-label="Raw Markdown"></textarea>
               <div id="floating-toolbar" class="floating-glass hidden" role="toolbar" aria-label="Selection tools">
                 <button type="button" class="ft-btn pressable" title="Bold" data-ft="bold" aria-label="Bold">
-                  <span class="icon" aria-hidden="true">text-b</span>
+                  <span class="ph ph-text-b" aria-hidden="true"></span>
                 </button>
                 <button type="button" class="ft-btn pressable" title="Italic" data-ft="italic" aria-label="Italic">
-                  <span class="icon" aria-hidden="true">text-italic</span>
+                  <span class="ph ph-text-italic" aria-hidden="true"></span>
                 </button>
                 <button type="button" class="ft-btn pressable" title="Underline" data-ft="underline" aria-label="Underline">
-                  <span class="icon" aria-hidden="true">text-underline</span>
+                  <span class="ph ph-text-underline" aria-hidden="true"></span>
                 </button>
                 <button type="button" class="ft-btn pressable" title="Highlight" data-ft="highlight" aria-label="Highlight">
-                  <span class="icon" aria-hidden="true">highlighter</span>
+                  <span class="ph ph-highlighter" aria-hidden="true"></span>
                 </button>
               </div>
             </div>

@@ -800,7 +800,7 @@
               : f.kind === 'pdf'
                 ? 'file-pdf'
                 : 'file-text';
-        btn.innerHTML = `<span class="icon" aria-hidden="true">${icon}</span><span class="doc-item-title"></span><span class="doc-ext"></span>`;
+        btn.innerHTML = `<span class="ph ph-${icon}" aria-hidden="true"></span><span class="doc-item-title"></span><span class="doc-ext"></span>`;
         btn.querySelector('.doc-item-title').textContent = f.name;
         btn.querySelector('.doc-ext').textContent = f.ext;
         btn.title = f.path;

@@ -305,7 +305,7 @@ button {
   background: var(--hover);
 }
 
-.glass-btn .icon {
+.glass-btn .ph {
   font-size: 18px;
   color: var(--accent);
 }
@@ -316,7 +316,7 @@ button {
   border-color: var(--border);
 }
 
-#save-btn .icon {
+#save-btn .ph {
   color: var(--bg);
 }
 
@@ -427,7 +427,7 @@ html[data-theme="dark"] .t-icon {
   border-radius: 6px;
 }
 
-.t-icon.mini .icon {
+.t-icon.mini .ph {
   font-size: 18px;
 }
 
@@ -566,7 +566,7 @@ html[data-theme="dark"] .t-icon {
   background: var(--surface-strong);
 }
 
-.sidebar-btn .icon {
+.sidebar-btn .ph {
   font-size: 18px;
 }
 
@@ -616,7 +616,7 @@ html[data-theme="dark"] .t-icon {
   display: inline-flex;
 }
 
-#insert-btn .icon {
+#insert-btn .ph {
   font-size: 22px;
 }
 
@@ -634,7 +634,7 @@ html[data-theme="dark"] .t-icon {
   gap: 8px;
 }
 
-#insert-menu .icon {
+#insert-menu .ph {
   font-size: 18px;
   opacity: 0.75;
 }
@@ -686,7 +686,7 @@ html[data-theme="dark"] .t-icon {
 }
 
 /* Theme toggle */
-#theme-toggle .icon {
+#theme-toggle .ph {
   font-size: 20px;
 }
 
@@ -1019,8 +1019,8 @@ body.pdf-open #center {
   color: var(--bg) !important;
 }
 
-.glass-btn.primary .icon,
-#link-apply .icon {
+.glass-btn.primary .ph,
+#link-apply .ph {
   color: var(--bg) !important;
 }
 
@@ -1264,7 +1264,7 @@ body.pdf-open #center {
   color: var(--crux-selected-text);
 }
 
-.doc-item .icon {
+.doc-item .ph {
   font-size: 18px;
   flex-shrink: 0;
   opacity: 0.85;
@@ -1607,7 +1607,7 @@ body.pdf-open #center {
     display: none;
   }
 
-  .header-actions .glass-btn span:not(.icon) {
+  .header-actions .glass-btn span:not(.ph) {
     display: none;
   }
 
