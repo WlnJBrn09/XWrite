@@ -7,22 +7,20 @@ Nothing is uploaded to the cloud. Documents are JSON files on disk.
 ## Requirements
 
 - Rust 1.75+ (`cargo`)
-- **Windows**: Microsoft Edge WebView2 Runtime (usually preinstalled)
-- **macOS / Linux**: system WebKit (built via GitHub Actions native workflow)
+- WebKitGTK: `libwebkit2gtk-4.1-dev` (Debian/Ubuntu) or `webkit2gtk4.1-devel` (Fedora)
 
 ## Desktop app (native)
 
-Thin desktop host (WebView2 on Windows, WKWebView/WebKit elsewhere) that spawns the Rust backend — **no Electron**.
+Thin desktop host (system WebKitGTK) that spawns the Rust backend — **no Electron**.
 
 ```bash
-# Windows
 npm run native:build
 npm run native
-npm run dist          # portable zip under dist/
+npm run dist:deb       # Debian/Ubuntu .deb
+npm run dist:rpm       # Fedora/RHEL/openSUSE .rpm
 ```
 
-Binary (dev): `native-host/target/release/xwrite-native.exe`
-Portable package: `dist/XWrite_v*_win.zip` → run `XWrite.exe`
+Binary (dev): `native-host/target/release/xwrite-native`
 
 See `native-host/README.md`.
 
@@ -50,7 +48,7 @@ Optional environment variables:
 
 ## Files
 
-Open TXT, Markdown, HTML, DOCX, PDF, and XWrite JSON files from the Documents library or the file picker. Export TXT, Markdown, DOCX, and PDF. PDF exports paginate long documents and preserve Western European characters and common punctuation. DOCX and PDF exports currently contain the document text; use the app's local JSON documents to retain editor formatting and embedded objects.
+Open TXT, Markdown, HTML, DOCX, PDF, and XWrite JSON files from the Documents library or the file picker. Export TXT, Markdown, DOCX, and PDF. DOCX and PDF exports preserve headings, emphasis, alignment, lists, links, tables, and embedded images. PDF exports embed fonts for searchable text and paginate long documents. Characters missing from the bundled PDF fonts produce an export error rather than a replacement glyph. DOCX imports currently extract text only; use the app's local JSON documents to keep editor formatting when editing again in XWrite.
 
 ## Tests
 

@@ -1,58 +1,56 @@
-# XWrite — Native Windows host
+# XWrite — native Linux host
 
-Thin Win32 desktop shell that **does not use Electron**. It spawns the existing Rust backend (`xwrite.exe`), waits for `GET /api/health`, and loads the product UI in a **WebView2** window.
+Thin desktop shell that **does not use Electron**. It spawns the existing Rust backend (`xwrite`), waits for `GET /api/health`, and loads the product UI in a **WebKitGTK** window via `wry`/`tao`.
 
 ## Prerequisites
 
-- Rust toolchain (MSVC)
-- Microsoft Edge **WebView2** Runtime (preinstalled on most Windows 10/11 machines)
+- Rust toolchain
+- WebKitGTK: `libwebkit2gtk-4.1-dev` (Debian/Ubuntu) or `webkit2gtk4.1-devel` (Fedora)
 - Backend built once: `cargo build --release` from `xwrite/`
 
 ## Build
 
 From `xwrite/`:
 
-```bat
+```sh
 npm run native:build
 ```
 
 Or:
 
-```bat
+```sh
 cargo build --release
 cargo build --release --manifest-path native-host/Cargo.toml
 ```
 
-Binary: `native-host/target/release/xwrite-native.exe`
+Binary: `native-host/target/release/xwrite-native`
 
 ## Run
 
-```bat
+```sh
 npm run native
 ```
 
 Headless (starts backend + health wait, no window; useful for CI/HTTP checks):
 
-```bat
-set XWRITE_NATIVE_HEADLESS_SECS=20
-native-host\target\release\xwrite-native.exe --headless
+```sh
+XWRITE_NATIVE_HEADLESS_SECS=20 native-host/target/release/xwrite-native --headless
 ```
 
-Default port: **8787** (`PORT` env overrides).
+Default port: **see product README** (`PORT` env overrides).
 
 ## Layout
 
-- **Dev**: host walks up from its exe path until it finds `static/index.html` and uses `target/release|debug/xwrite.exe`.
-- **Packaged**: place `xwrite-native.exe` next to `backend/xwrite.exe` and `static/`.
+- **Dev**: host walks up from its exe path until it finds `static/index.html` and uses `target/release|debug/xwrite`.
+- **Packaged**: place `xwrite-native` next to `backend/xwrite` and `static/`.
 
 ## Packaging
 
-From the product root on Windows:
+From the product root:
 
-```bat
-npm run dist
+```sh
+npm run dist:deb   # Debian/Ubuntu .deb (build on Debian trixie)
+npm run dist:rpm   # Fedora/RHEL/openSUSE .rpm (build with rpmbuild)
 ```
 
-Produces `dist/XWrite_v*_win.zip` with `XWrite.exe`, `backend/`, and `static/`.
-
-macOS and Linux natives are built in CI (`.github/workflows/native.yml`).
+See [Debian packaging](../../packaging/debian/README.md) and [RPM packaging](../../packaging/rpm/README.md).
