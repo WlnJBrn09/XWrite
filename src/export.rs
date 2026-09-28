@@ -82,7 +82,8 @@ fn sanitize_filename(s: &str) -> String {
     let t: String = s
         .chars()
         .map(|c| {
-            if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == ' ' {
+            // Keep letters from every script; headers carry them via RFC 5987 `filename*`.
+            if c.is_alphanumeric() || c == '-' || c == '_' || c == ' ' {
                 c
             } else {
                 '_'
@@ -112,6 +113,8 @@ pub fn html_to_plain(html: &str) -> String {
                 let closing = tag.starts_with('/');
                 if name == "br" {
                     out.push('\n');
+                } else if matches!(name, "td" | "th") && closing {
+                    out.push('\t');
                 } else if matches!(name, "p" | "div" | "h1" | "h2" | "h3" | "h4" | "li" | "tr")
                     && (closing || name == "li")
                 {
@@ -138,7 +141,14 @@ pub fn html_to_plain(html: &str) -> String {
     out.split("\n\n")
         .map(|p| {
             p.lines()
-                .map(|l| l.split_whitespace().collect::<Vec<_>>().join(" "))
+                .map(|l| {
+                    // Keep tabs between table cells; collapse other runs of whitespace.
+                    l.trim_end_matches('\t')
+                        .split('\t')
+                        .map(|cell| cell.split_whitespace().collect::<Vec<_>>().join(" "))
+                        .collect::<Vec<_>>()
+                        .join("\t")
+                })
                 .filter(|l| !l.is_empty())
                 .collect::<Vec<_>>()
                 .join("\n")
@@ -181,18 +191,24 @@ pub fn html_to_markdown(html: &str) -> String {
     s = replace_tag_content(&s, "h1", "# ", "\n\n");
     s = replace_tag_content(&s, "h2", "## ", "\n\n");
     s = replace_tag_content(&s, "h3", "### ", "\n\n");
+    s = replace_tag_content(&s, "h4", "#### ", "\n\n");
+    s = replace_tag_content(&s, "h5", "##### ", "\n\n");
+    s = replace_tag_content(&s, "h6", "###### ", "\n\n");
     s = replace_tag_content(&s, "strong", "**", "**");
     s = replace_tag_content(&s, "b", "**", "**");
     s = replace_tag_content(&s, "em", "*", "*");
     s = replace_tag_content(&s, "i", "*", "*");
     s = replace_tag_content(&s, "code", "`", "`");
+    s = number_ordered_lists(&s);
     s = replace_tag_content(&s, "li", "- ", "\n");
+    s = s.replace("</td>", " | ").replace("</th>", " | ").replace("</TD>", " | ").replace("</TH>", " | ");
+    s = s.replace("</tr>", "\n").replace("</TR>", "\n");
     s = replace_links(&s);
     s = s.replace("</p>", "\n\n").replace("</div>", "\n\n");
     s = strip_tags(&s);
     html_to_plain(&s.chars().map(|c| c).collect::<String>())
         .lines()
-        .map(str::trim)
+        .map(|l| l.trim().trim_end_matches(" |").trim_end_matches('|').trim_end())
         .filter(|l| !l.is_empty())
         .collect::<Vec<_>>()
         .join("\n\n")
@@ -208,7 +224,7 @@ fn replace_tag_content(html: &str, tag: &str, before: &str, after: &str) -> Stri
     let bytes = html.as_bytes();
     let lower_b = lower.as_bytes();
     while i < bytes.len() {
-        if let Some(rel) = find_subslice(&lower_b[i..], open.as_bytes()) {
+        if let Some(rel) = find_tag(&lower_b[i..], open.as_bytes()) {
             let start = i + rel;
             out.push_str(&html[i..start]);
             // find end of open tag
@@ -279,6 +295,59 @@ fn replace_links(html: &str) -> String {
 
 fn find_subslice(hay: &[u8], needle: &[u8]) -> Option<usize> {
     hay.windows(needle.len()).position(|w| w == needle)
+}
+
+/// Find an opening tag such as `<b`, skipping longer names that share the prefix
+/// (`<blockquote>`, `<br>`, `<img>` for `<i`, `<embed>` for `<em`, …).
+fn find_tag(hay: &[u8], open: &[u8]) -> Option<usize> {
+    let mut from = 0;
+    while let Some(rel) = find_subslice(&hay[from..], open) {
+        let at = from + rel;
+        match hay.get(at + open.len()) {
+            Some(b'>' | b'/') | None => return Some(at),
+            Some(c) if c.is_ascii_whitespace() => return Some(at),
+            _ => from = at + 1,
+        }
+    }
+    None
+}
+
+/// Number the items of each `<ol>` so ordered lists survive as `1.`, `2.`, …
+fn number_ordered_lists(html: &str) -> String {
+    let lower = html.to_ascii_lowercase();
+    let mut out = String::new();
+    let mut i = 0;
+    while let Some(rel) = find_tag(&lower.as_bytes()[i..], b"<ol") {
+        let start = i + rel;
+        let Some(end_rel) = lower[start..].find("</ol>") else {
+            break;
+        };
+        let end = start + end_rel;
+        out.push_str(&html[i..start]);
+        let block = &html[start..end];
+        let block_lower = &lower[start..end];
+        let mut j = 0;
+        let mut n = 0;
+        while let Some(li_rel) = find_tag(&block_lower.as_bytes()[j..], b"<li") {
+            let li = j + li_rel;
+            let Some(gt) = block[li..].find('>') else {
+                break;
+            };
+            n += 1;
+            out.push_str(&block[j..li]);
+            out.push_str(&format!("{n}. "));
+            j = li + gt + 1;
+            if let Some(close) = block_lower[j..].find("</li>") {
+                out.push_str(&block[j..j + close]);
+                out.push('\n');
+                j += close + "</li>".len();
+            }
+        }
+        out.push_str(&block[j..]);
+        i = end + "</ol>".len();
+    }
+    out.push_str(&html[i..]);
+    out
 }
 
 fn strip_tags(html: &str) -> String {
@@ -509,6 +578,34 @@ mod tests {
         assert_eq!(
             html_to_markdown("<p><a href=\"https://example.com\">Link</a></p>"),
             "[Link](https://example.com)"
+        );
+    }
+
+    #[test]
+    fn markdown_does_not_confuse_tags_sharing_a_prefix() {
+        assert_eq!(
+            html_to_markdown("<blockquote><p>quote</p></blockquote><p>then <b>bold</b></p>"),
+            "quote\n\nthen **bold**"
+        );
+        assert_eq!(
+            html_to_markdown("<p><img src=\"x.png\"></p><p>then <i>it</i></p>"),
+            "then *it*"
+        );
+    }
+
+    #[test]
+    fn markdown_numbers_ordered_lists_and_separates_table_cells() {
+        assert_eq!(
+            html_to_markdown("<ol><li>first</li><li>second</li></ol><ul><li>dot</li></ul>"),
+            "1. first\n\n2. second\n\n- dot"
+        );
+        assert_eq!(
+            html_to_markdown("<table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table>"),
+            "A | B\n\n1 | 2"
+        );
+        assert_eq!(
+            html_to_plain("<table><tr><td>A</td><td>B c</td></tr><tr><td>1</td><td>2</td></tr></table>"),
+            "A\tB c\n\n1\t2"
         );
     }
 

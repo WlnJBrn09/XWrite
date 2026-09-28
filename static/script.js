@@ -503,8 +503,10 @@
       const blob = await res.blob();
       const cd = res.headers.get('Content-Disposition') || '';
       let filename = title + '.' + format;
-      const m = cd.match(/filename=\"([^\"]+)\"/);
-      if (m) filename = m[1];
+      const star = cd.match(/filename\*=UTF-8''([^;]+)/i);
+      const m = cd.match(/filename="([^"]+)"/);
+      if (star) filename = decodeURIComponent(star[1]);
+      else if (m) filename = m[1];
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = filename;
